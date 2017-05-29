@@ -1,4 +1,2 @@
 # quantum-chemistry
-my projects involving QC
-Hello world!
-Dupa
+Here I'll be putting some of my QC projects
