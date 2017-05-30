@@ -1,0 +1,200 @@
+# This file works in Python 3. It generates series of inputs for USPEX + vasp programs for systematic search
+# of global minima of three-element compounds.
+# Please be aware that it can generate plenty of folders (depending on the range of stoichiometries)!
+# It requires some modified inputs files that have to be modified before run, so if you are interested in using
+# this code, please contact me: pawellata@gmail.com
+
+import os
+import fileinput
+
+dict_of_at = {'H': 1, 'He': 2, 'Li': 3, 'Be': 4, 'B': 5, 'C': 6, 'N': 7, 'O': 8, 'F': 9, 'Ne': 10, 'Na': 11, 'Mg': 12, 'Al': 13, 'Si': 14, 'P': 15, 'S': 16, 'Cl': 17, 'Ar': 18, 'K': 19, 'Ca': 20, 'Sc': 21, 'Ti': 22, 'V': 23, 'Cr': 24, 'Mn': 25, 'Fe': 26, 'Co': 27, 'Ni': 28, 'Cu': 29, 'Zn': 30, 'Ga': 31, 'Ge': 32, 'As': 33, 'Se': 34, 'Br': 35, 'Kr': 36, 'Rb': 37, 'Sr': 38, 'Y': 39, 'Zr': 40, 'Nb': 41, 'Mo': 42, 'Tc': 43, 'Ru': 44, 'Rh': 45, 'Pd': 46, 'Ag': 47, 'Cd': 48, 'In': 49, 'Sn': 50, 'Sb': 51, 'Te': 52, 'I': 53, 'Xe': 54, 'Cs': 55, 'Ba': 56, 'La': 57, 'Ce': 58, 'Pr': 59, 'Nd': 60, 'Pm': 61, 'Sm': 62, 'Eu': 63, 'Gd': 64, 'Tb': 65, 'Dy': 66, 'Ho': 67, 'Er': 68, 'Tm': 69, 'Yb': 70, 'Lu': 71, 'Hf': 72, 'Ta': 73, 'W': 74, 'Re': 75, 'Os': 76, 'Ir': 77, 'Pt': 78, 'Au': 79, 'Hg': 80, 'Tl': 81, 'Pb': 82, 'Bi': 83, 'Po': 84, 'At': 85, 'Rn': 86, 'Fr': 87, 'Ra': 88, 'Ac': 89, 'Th': 90, 'Pa': 91, 'U': 92, 'Np': 93, 'Pu': 94, 'Am': 95, 'Cm': 96, 'Bk': 97, 'Cf': 98, 'Es': 99, 'Fm': 100, 'Md': 101, 'No': 102, 'Lr': 103, 'Rf': 104, 'Db': 105, 'Sg': 106, 'Bh': 107, 'Hs': 108, 'Mt': 109, 'Ds': 110, 'Uuu': 111, 'Uub': 112, 'Uut': 113, 'Uuq': 114, 'Uup': 115, 'Uuh': 116, 'Uus': 117, 'Uuo': 118}
+
+dict_of_radii = {'Ac':186,'Al':126,'Am':166,'Sb':140,'Ar':96,'As':121,'At':147,'Ba':196,'Bk':168,'Be':102,'Bi':151,'Bh':141,'B':85,'Br':114,'Cd':136,'Ca':171,'Cf':168,'C':75,'Ce':163,'Cs':232,'Cl':99,'Cr':122,'Co':111,'Cn':122,'Cu':112,'Cm':166,'Ds':128,'Db':149,'Dy':167,'Es':165,'Er':165,'Eu':168,'Fm':167,'Fl':143,'F':64,'Fr':223,'Gd':169,'Ga':124,'Ge':121,'Au':124,'Hf':152,'Hs':134,'He':46,'Ho':166,'H':32,'In':142,'I':133,'Ir':122,'Fe':116,'Kr':117,'La':180,'Lr':161,'Pb':144,'Li':133,'Lv':175,'Lu':162,'Mg':139,'Mn':119,'Mt':129,'Md':173,'Hg':133,'Mo':138,'Nd':174,'Ne':67,'Np':171,'Ni':110,'Nb':147,'N':71,'No':176,'Os':129,'O':63,'Pa':120,'P':111,'Pt':123,'Pu':172,'Po':145,'K':196,'Pr':176,'Pm':173,'Pa':169,'Ra':201,'Rn':142,'Re':131,'Rh':125,'Rg':121,'Rb':210,'Ru':125,'Rf':157,'Sm':172,'Sc':148,'Sg':143,'Se':116,'Si':116,'Ag':128,'Na':155,'Sr':185,'S':103,'Ta':146,'Tc':128,'Te':136,'Tb':168,'Tl':144,'Th':175,'Tm':164,'Sn':140,'Ti':136,'W':137,'Uuo':157,'Uup':162,'Uus':165,'Uut':136,'U':170,'V':134,'Xe':131,'Yb':170,'Y':163,'Zn':118,'Zr':154}
+
+
+#-----------------------------------------------
+def st_gen(n1min,n1max,n2min,n2max,n3min,n3max):
+#generates the combinations of stoichiometric coordinates
+    set_tabl=set()
+    for i in range(n1min,n1max+1):
+        for j in range(n2min,n2max+1):
+            for k in range(n3min,n3max+1):
+                x=(i,j,k)
+                
+                f=float(i)
+                g=float(j)
+                h=float(k)
+
+                for l in range(2,max(i,j,k)+1):
+                    if f % l == 0 and g % l == 0 and h % l == 0:
+                        break
+                else:
+                    if x not in set_tabl:
+                        set_tabl.add(x)
+    if (0,0,0) in set_tabl:
+        set_tabl.remove((0,0,0))
+    tabl = []
+    for j in set_tabl:
+        tabl.append(list(j))
+    tabl_sort = sorted(tabl)
+
+    return tabl_sort
+#-----------------------------------------------
+
+#
+#------------------------------------
+z = input("F.U.: ")
+
+at1,at2,at3='','',''
+at1=raw_input("at1: ")
+while at1 not in dict_of_at.keys():
+    print('Atom not in list')
+    at1=raw_input('at1: ')
+at2=raw_input("at2: ")
+while at2 not in dict_of_at.keys():
+    print('Atom not in list')
+    at2=raw_input("at2: ")
+at3=raw_input("at3: ")
+while at3 not in dict_of_at.keys():
+    print('Atom not in list')
+    at3=raw_input("at3: ")
+
+x1 = input("Amin: ")
+x2 = input("Amax: ")
+y1 = input("Bmin: ")
+y2 = input("Bmax: ")
+z1 = input("Cmin: ")
+z2 = input("Cmax: ")
+val1 = input("Valence for at1: ")
+val2 = input("Valence for at2: ")
+val3 = input("Valence for at3: ")
+
+get_list = st_gen(x1,x2,y1,y2,z1,z2)
+#------------------------------------
+
+n=1
+#for p in range(1,z+1):
+
+#    for i in get_list:
+
+#        print "%s%d %s%d %s%d    %d" % (at1,i[0]*p,at2,i[1]*p,at3,i[2]*p,n)
+#        n+=1
+# Make general directory
+genpath = at1 + "-" + at2 + "-" + at3
+os.mkdir(genpath)
+fupath_list = []
+stpath_list = []
+
+for i in range(1,z+1):
+# Make formula unit directories
+    fupath = genpath + '/' + "FU-" + str(i)
+    os.mkdir(fupath)
+    fupath_list.append(fupath)
+#    stpath_list = []
+    for j in get_list:
+        stpath = fupath + '/' + at1 + str(j[0]) + '-' + at2 + str(j[1]) + '-' + at3 + str(j[2]) 
+        os.mkdir(stpath)
+        stpath_list.append(stpath)
+        os.mkdir(stpath + '/Specific')
+        os.mkdir(stpath + '/Submission')
+        atoms_list = [at1,at2,at3]        
+        stoich = j
+        at_Z = [dict_of_at[at1],dict_of_at[at2],dict_of_at[at3]]
+        val = [val1,val2,val3]
+        stoich_red,at_Z_red,val_red,at_red = [],[],[],[]
+        for k in [0,1,2]:
+            if stoich[k] !=0:
+                stoich_red.append(stoich[k])
+                at_Z_red.append(at_Z[k])
+                val_red.append(val[k])
+                at_red.append(atoms_list[k])                
+
+        print(stoich + ["    "] + stoich_red,at_Z_red,val_red)
+
+#        numsp = (' '.join(str(x*i) for x in j))
+        numsp = (' '.join(str(x*i) for x in stoich_red)) 
+        atomt = (' '.join(str(y) for y in at_Z_red))
+        atomki = (' '.join(str(z) for z in val_red))
+        print(numsp + "     " + atomt + "     " + atomki)
+        matrix_dist=[]
+        matrixxx_dist=[]
+        for k in at_Z_red:
+            radius1 = dict_of_radii[(dict_of_at.keys()[dict_of_at.values().index(k)])]
+            matrixxx_dist=[]
+            for l in at_Z_red:
+                radius2 = dict_of_radii[(dict_of_at.keys()[dict_of_at.values().index(l)])]
+                matrixxx_dist.append(radius1*0.01+radius2*0.01)
+                print(matrixxx_dist)
+            matrix_dist.append(matrixxx_dist)
+        print(matrix_dist)
+        for md in matrix_dist:
+            print(' '.join(str(x) for x in md))
+        volume = 0
+        for k in range(0,len(at_red)):
+            radius = dict_of_radii[at_red[k]]
+            print(radius)
+            volume = volume + (2 * radius * 0.01)**3 * i * stoich_red[k]
+
+        matrix_dist_str = ('\n'.join((' '.join(str(du) for du in i)) for i in matrix_dist))
+        
+#        atomt = str(dict_of_at[at1]) + ' ' + str(dict_of_at[at2]) + ' ' + str(dict_of_at[at3])
+        filedir = stpath + '/INPUT.txt'
+        print(stpath)
+        with open(filedir,'w') as f:
+            for line in fileinput.input("inx.txt"):
+                f.write(line.replace("py-numsp", str(numsp)).replace("py-atomt", str(atomt)).replace("py-val", str(atomki)).replace("py-matrix_dist", str(matrix_dist_str)).replace("py-volume", str(volume)))
+        f.close()
+################## POTCARS ###################################
+        with open(stpath + '/Specific/POTCAR_1','w') as fil:
+            for k in at_red:
+                for line in fileinput.input("/home/pablo/pseudo_vasp/potpaw_PBE_potcar/"+k+"/POTCAR"):
+                    fil.write(line)
+        fil.close()
+        with open(stpath + '/Specific/POTCAR_2','w') as fil:
+            for k in at_red:
+                for line in fileinput.input("/home/pablo/pseudo_vasp/potpaw_PBE_potcar/"+k+"/POTCAR"):
+                    fil.write(line)
+        fil.close()
+        with open(stpath + '/Specific/POTCAR_3','w') as fil:
+            for k in at_red:
+                for line in fileinput.input("/home/pablo/pseudo_vasp/potpaw_PBE_potcar/"+k+"/POTCAR"):
+                    fil.write(line)
+        fil.close()
+################### INCARS ####################################
+        with open(stpath + '/Specific/INCAR_1','w') as fil:
+            for line in fileinput.input("/home/pablo/gibbs/USPEX/Specific/INCAR_1"):
+                fil.write(line)
+        fil.close()
+        with open(stpath + '/Specific/INCAR_2','w') as fil:
+            for line in fileinput.input("/home/pablo/gibbs/USPEX/Specific/INCAR_2"):
+                fil.write(line)
+        fil.close()
+        with open(stpath + '/Specific/INCAR_3','w') as fil:
+            for line in fileinput.input("/home/pablo/gibbs/USPEX/Specific/INCAR_3"):
+                fil.write(line)
+        fil.close()
+################## Submission ##################################
+
+        with open(stpath + '/Submission/submitJob_local.m','w') as fil:
+            for line in fileinput.input("/home/pablo/gibbs/USPEX/Submission/submitJob_local.m"):
+                fil.write(line)
+        fil.close()
+        with open(stpath + '/Submission/checkStatus_local.m','w') as fil:
+            for line in fileinput.input("/home/pablo/gibbs/USPEX/Submission/checkStatus_local.m"):
+                fil.write(line)
+        fil.close()
+print(stpath_list)
+stpath_for = ' '.join(stpath_list)
+print(stpath_for)
+
+with open('run-' + genpath, 'w') as fil:
+    fil.write('#!/bin/bash\n\n')
+#    fil.write('stpath = "%s"\n' % (stpath_for))
+    fil.write('for i in %s\n' % (stpath_for))
+    fil.write('do\n')
+    fil.write('    cp -r uspex-files/* $i\n')
+    fil.write('    cd $i\n')
+    fil.write('    matlab < USPEX.m\n')
+    fil.write('    cd ../../../\n')
+    fil.write('done\n')
+fil.close()
