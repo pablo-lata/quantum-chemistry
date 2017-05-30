@@ -1,4 +1,4 @@
-# This file works in Python 3. It generates series of inputs for USPEX + vasp programs for systematic search
+# This code works in Python 3. It generates series of inputs for USPEX + vasp programs for systematic search
 # of global minima of three-element compounds.
 # Please be aware that it can generate plenty of folders (depending on the range of stoichiometries)!
 # It requires some modified inputs files that have to be modified before run, so if you are interested in using
